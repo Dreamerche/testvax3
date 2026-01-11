@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<! Сайтът е за проект в университета -->
+		<title>Геншин пейзажни кристали</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0;
+				overflow: hidden;
+				background: black;
+			}
+		</style>
+
+		<script type="importmap">
+          {
+            "imports": {
+              "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+              "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+              "vax": "https://boytchev.github.io/CourseVAX/lib/vax.js"
+            }
+          }
+    </script>
+</head>
+
+<body>
+	<script type="module">
+		import * as THREE from "three";
+		import * as VAX from "vax";
+
+		//пуснете първо портетно, после завъртете телефона на пейзажно
+
+		VAX.init(animate);
+		VAX.camera.far = 4000;
+		VAX.camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+
+		var loader = new THREE.CubeTextureLoader();
+		var envTexture = loader.load([
+			'papka/px.png', 'papka/nx.png',
+			'papka/py.png', 'papka/ny.png',
+			'papka/pz.png', 'papka/nz.png'
+		]);
+
+		VAX.scene.background = envTexture;
+		VAX.scene.environment = envTexture;
+
+		var geometry = new THREE.IcosahedronGeometry(110, 0);
+
+		var material = new THREE.MeshPhysicalMaterial({
+			roughness: 0,
+			metalness: 0,
+			transmission: 1,
+			thickness: 1,
+			ior: 1.5,
+			envMap: envTexture,
+			envMapIntensity: 1,
+			specularIntensity: 1
+		});
+
+		var broi = 100;
+		var stuklenniDekoracii = [];
+
+		for (var i = 0; i < broi; i++) {
+			var curentKristal = new THREE.Mesh(geometry, material);
+			var a = THREE.MathUtils.randFloat(-3456, 3456);
+			var b = THREE.MathUtils.randFloat(-1000, 1000);
+			var c = THREE.MathUtils.randFloat(-1000, 1000);
+			curentKristal.position.set(a, b, c);
+
+			stuklenniDekoracii.push(curentKristal);
+			VAX.scene.add(curentKristal);
+		}
+
+		window.addEventListener("deviceorientation", deviceOrientation, true);
+
+		function deviceOrientation(event) {
+			var alpha = event.alpha;
+			var gamma = event.gamma;
+
+			if (alpha === null) return;
+
+			if (gamma >= 0)
+				gamma = 90 - gamma;
+			else {
+				alpha = alpha + 180;
+				gamma = -90 - gamma;
+			}
+
+			alpha = THREE.MathUtils.degToRad(alpha);
+			gamma = THREE.MathUtils.degToRad(gamma);
+
+			VAX.camera.rotation.set(gamma, alpha, 0, 'YXZ');
+		}
+
+		function animate(t) {
+			for (var j = 0; j < broi; j++) {
+				stuklenniDekoracii[j].rotation.set(0.3 * t, 10, t);
+			}
+		}
+
+	</script>
+</body>
+
+</html>
